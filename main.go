@@ -15,6 +15,14 @@ type CreateTableOpts struct {
 	ExcludeFields  map[string]bool
 }
 
+type InsertOpts struct {
+	TablePrefix string
+	PrependColumns string
+	PrependValues string
+	IncludeFields  map[string]bool
+	ExcludeFields  map[string]bool
+}
+
 func CreateTable(u interface{}, opts *CreateTableOpts) string {
 	v := reflect.ValueOf(u)
 	i := reflect.Indirect(v)
@@ -35,7 +43,7 @@ func CreateTable(u interface{}, opts *CreateTableOpts) string {
 		excludeFields = opts.ExcludeFields
 	}
 
-	cols := getColumnListFromType(s, "", "", false, includeFields, excludeFields, true)
+	cols := getColumnListFromType(s, "", "", false, includeFields, excludeFields, true, false)
 	if opts != nil && opts.PrependColumns != "" {
 		newCols := strings.TrimSpace(opts.PrependColumns)
 		if !strings.HasSuffix(newCols, ",") {
@@ -48,7 +56,51 @@ func CreateTable(u interface{}, opts *CreateTableOpts) string {
 	return fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", dbTable, cols)
 }
 
-func getColumnListFromType(t reflect.Type, colPrefix string, parentFieldName string, parentFieldPointer bool, includeFields map[string]bool, excludeFields map[string]bool, goDeeper bool) string {
+func Insert(u interface{}, opts *InsertOpts) string {
+	v := reflect.ValueOf(u)
+	i := reflect.Indirect(v)
+	s := i.Type()
+	usName := getUnderscoredName(s.Name())
+
+	dbTable := getPluralName(usName)
+	if opts != nil && opts.TablePrefix != "" {
+		dbTable = opts.TablePrefix + dbTable
+	}
+
+	includeFields := map[string]bool{}
+	if opts != nil {
+		includeFields = opts.IncludeFields
+	}
+	excludeFields := map[string]bool{}
+	if opts != nil {
+		excludeFields = opts.ExcludeFields
+	}
+
+	cols := getColumnListFromType(s, "", "", false, includeFields, excludeFields, true, true)
+	colsLen := len(strings.Split(cols, ","))
+	vals := strings.TrimRight(strings.Repeat("?,",colsLen), ",")
+	if opts != nil && opts.PrependColumns != "" {
+		newCols := strings.TrimSpace(opts.PrependColumns)
+		if !strings.HasSuffix(newCols, ",") {
+			newCols += ","
+		}
+		newCols += cols
+		cols = newCols
+	}
+	if opts != nil && opts.PrependValues != "" {
+		newVals := strings.TrimSpace(opts.PrependValues)
+		if !strings.HasSuffix(newVals, ",") {
+			newVals += ","
+		}
+		newVals += vals
+		vals = newVals
+	}
+	
+
+	return fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);", dbTable, cols, vals)
+}
+
+func getColumnListFromType(t reflect.Type, colPrefix string, parentFieldName string, parentFieldPointer bool, includeFields map[string]bool, excludeFields map[string]bool, goDeeper bool, onlyCols bool) string {
 	cols := ""
 	for j := 0; j < t.NumField(); j++ {
 		field := t.Field(j)
@@ -73,7 +125,10 @@ func getColumnListFromType(t reflect.Type, colPrefix string, parentFieldName str
 			if cols != "" {
 				cols += ","
 			}
-			cols += colName + " " + colType
+			cols += colName 
+			if !onlyCols {
+				cols += " " + colType
+			}
 		}
 
 		structName := getStructName(field)
@@ -81,9 +136,9 @@ func getColumnListFromType(t reflect.Type, colPrefix string, parentFieldName str
 			colPrefix := getColumnNameFromField(field) + "_"
 			colsInside := ""
 			if isFieldTypePointer(field) {
-				colsInside = getColumnListFromType(field.Type.Elem(), colPrefix, field.Name, isFieldTypePointer(field), includeFields, excludeFields, false)
+				colsInside = getColumnListFromType(field.Type.Elem(), colPrefix, field.Name, isFieldTypePointer(field), includeFields, excludeFields, false, onlyCols)
 			} else {
-				colsInside = getColumnListFromType(field.Type, colPrefix, field.Name, isFieldTypePointer(field), includeFields, excludeFields, false)
+				colsInside = getColumnListFromType(field.Type, colPrefix, field.Name, isFieldTypePointer(field), includeFields, excludeFields, false, onlyCols)
 			}
 			if colsInside != "" {
 				if cols != "" {

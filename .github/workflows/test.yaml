@@ -1,0 +1,20 @@
+name: Run tests
+
+on:
+  pull_requests:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+jobs:
+  main:
+    name: Run tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: |
+          go test

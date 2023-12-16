@@ -1,2 +1,4 @@
 # go-struct2sql
-Quick and dirty SQL query generator
+
+Quick and dirty code snippet that generate SQLite3 SQL queries from struct,
+eg. `CREATE TABLE` one.

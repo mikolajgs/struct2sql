@@ -24,7 +24,7 @@ func Test(t *testing.T) {
 			"StringField": true,
 		},
 	})
-	want := "CREATE TABLE IF NOT EXIST prefix_test_structs (id INTEGER NOT NULL PRIMARY KEY,int_field INT,bool_field BOOLEAN);"
+	want := "CREATE TABLE IF NOT EXISTS prefix_test_structs (id INTEGER NOT NULL PRIMARY KEY,int_field INT,bool_field BOOLEAN);"
 	if got != want {
 		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
 	}
@@ -38,7 +38,7 @@ func Test(t *testing.T) {
 			"TestStruct2Field.StringField": true,
 		},
 	})
-	want = "CREATE TABLE IF NOT EXIST test_struct2s (test_struct2_field_int_field INT NULL,test_struct2_field_bool_field BOOLEAN NULL);"
+	want = "CREATE TABLE IF NOT EXISTS test_struct2s (test_struct2_field_int_field INT NULL,test_struct2_field_bool_field BOOLEAN NULL);"
 	if got != want {
 		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
 	}
@@ -68,7 +68,7 @@ func Test(t *testing.T) {
 			"WorkflowJob.WorkflowName": true,
 		},
 	})
-	want = "CREATE TABLE IF NOT EXIST workflow_job_events (id INTEGER NOT NULL PRIMARY KEY,time DATETIME NOT NULL,delivery_id TEXT,workflow_job_id INT NULL,workflow_job_run_id INT NULL,workflow_job_run_u_r_l TEXT NULL,workflow_job_head_branch TEXT NULL,workflow_job_head_s_h_a TEXT NULL,workflow_job_status TEXT NULL,workflow_job_conclusion TEXT NULL,workflow_job_created_at DATETIME NULL,workflow_job_started_at DATETIME NULL,workflow_job_completed_at DATETIME NULL,workflow_job_name TEXT NULL,workflow_job_runner_id INT NULL,workflow_job_runner_name TEXT NULL,workflow_job_run_attempt INT NULL,workflow_job_workflow_name TEXT NULL,action TEXT NULL,repo_full_name TEXT NULL,repo_private BOOLEAN NULL);"
+	want = "CREATE TABLE IF NOT EXISTS workflow_job_events (id INTEGER NOT NULL PRIMARY KEY,time DATETIME NOT NULL,delivery_id TEXT,workflow_job_id INT NULL,workflow_job_run_id INT NULL,workflow_job_run_u_r_l TEXT NULL,workflow_job_head_branch TEXT NULL,workflow_job_head_s_h_a TEXT NULL,workflow_job_status TEXT NULL,workflow_job_conclusion TEXT NULL,workflow_job_created_at DATETIME NULL,workflow_job_started_at DATETIME NULL,workflow_job_completed_at DATETIME NULL,workflow_job_name TEXT NULL,workflow_job_runner_id INT NULL,workflow_job_runner_name TEXT NULL,workflow_job_run_attempt INT NULL,workflow_job_workflow_name TEXT NULL,action TEXT NULL,repo_full_name TEXT NULL,repo_private BOOLEAN NULL);"
 	if got != want {
 		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
 	}

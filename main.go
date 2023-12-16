@@ -45,7 +45,7 @@ func CreateTable(u interface{}, opts *CreateTableOpts) string {
 		cols = newCols
 	}
 
-	return fmt.Sprintf("CREATE TABLE IF NOT EXIST %s (%s);", dbTable, cols)
+	return fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", dbTable, cols)
 }
 
 func getColumnListFromType(t reflect.Type, colPrefix string, parentFieldName string, parentFieldPointer bool, includeFields map[string]bool, excludeFields map[string]bool, goDeeper bool) string {

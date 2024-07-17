@@ -152,10 +152,7 @@ func getColumnListFromType(t reflect.Type, colPrefix string, parentFieldName str
 }
 
 func isFieldTypePointer(field reflect.StructField) bool {
-	if field.Type.Kind() == reflect.Pointer {
-		return true
-	}
-	return false
+	return field.Type.Kind() == reflect.Pointer
 }
 
 func getStructName(field reflect.StructField) string {
@@ -212,6 +209,13 @@ func getColumnTypeFromField(field reflect.StructField, forceNull bool) string {
 }
 
 func getUnderscoredName(s string) string {
+	// Match all acronyms and leave only first letter capital, eg. 'SQL' becomes 'Sql'
+	re := regexp.MustCompile(`[A-Z][A-Z0-9]+`)
+	for _, found := range re.FindAllString(s, -1) {
+		n := fmt.Sprintf("%s%s", string(found[0]), strings.ToLower(found)[1:])
+		s = strings.Replace(s, found, n, -1)
+	}
+
 	o := ""
 	var prev rune
 	for i, ch := range s {

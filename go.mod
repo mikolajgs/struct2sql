@@ -1,4 +1,4 @@
-module github.com/bitsnops/go-struct2sql
+module github.com/mikolajgs/struct2sql
 
 go 1.20
 

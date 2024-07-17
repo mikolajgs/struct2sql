@@ -1,8 +1,9 @@
 package struct2sql
 
 import (
-	"github.com/google/go-github/v56/github"
 	"testing"
+
+	"github.com/google/go-github/v56/github"
 )
 
 type TestStruct struct {
@@ -14,6 +15,10 @@ type TestStruct struct {
 type TestStruct2 struct {
 	IntField2        int
 	TestStruct2Field *TestStruct
+}
+
+type TestStruct3 struct {
+	CreatedAt *string
 }
 
 func TestCreateTable(t *testing.T) {
@@ -68,7 +73,16 @@ func TestCreateTable(t *testing.T) {
 			"Repo.Private":             true,
 		},
 	})
-	want = "CREATE TABLE IF NOT EXISTS workflow_job_events (id INTEGER NOT NULL PRIMARY KEY,time DATETIME NOT NULL,delivery_id TEXT,workflow_job_id INT NULL,workflow_job_run_id INT NULL,workflow_job_run_u_r_l TEXT NULL,workflow_job_head_branch TEXT NULL,workflow_job_head_s_h_a TEXT NULL,workflow_job_status TEXT NULL,workflow_job_conclusion TEXT NULL,workflow_job_created_at DATETIME NULL,workflow_job_started_at DATETIME NULL,workflow_job_completed_at DATETIME NULL,workflow_job_name TEXT NULL,workflow_job_runner_id INT NULL,workflow_job_runner_name TEXT NULL,workflow_job_run_attempt INT NULL,workflow_job_workflow_name TEXT NULL,action TEXT NULL,repo_full_name TEXT NULL,repo_private BOOLEAN NULL);"
+	want = "CREATE TABLE IF NOT EXISTS workflow_job_events (id INTEGER NOT NULL PRIMARY KEY,time DATETIME NOT NULL,delivery_id TEXT,workflow_job_id INT NULL,workflow_job_run_id INT NULL,workflow_job_run_url TEXT NULL,workflow_job_head_branch TEXT NULL,workflow_job_head_sha TEXT NULL,workflow_job_status TEXT NULL,workflow_job_conclusion TEXT NULL,workflow_job_created_at DATETIME NULL,workflow_job_started_at DATETIME NULL,workflow_job_completed_at DATETIME NULL,workflow_job_name TEXT NULL,workflow_job_runner_id INT NULL,workflow_job_runner_name TEXT NULL,workflow_job_run_attempt INT NULL,workflow_job_workflow_name TEXT NULL,action TEXT NULL,repo_full_name TEXT NULL,repo_private BOOLEAN NULL);"
+	if got != want {
+		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
+	}
+
+	got = CreateTable(&TestStruct3{}, &CreateTableOpts{
+		TablePrefix: "",
+		PrependColumns: "id INTEGER NOT NULL PRIMARY KEY",
+	})
+	want = "CREATE TABLE IF NOT EXISTS test_struct3s (id INTEGER NOT NULL PRIMARY KEY,created_at TEXT NULL);"
 	if got != want {
 		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
 	}
@@ -116,6 +130,15 @@ func TestInsert(t *testing.T) {
 		},
 	})
 	want = "INSERT INTO workflow_job_events (id,time,delivery_id,workflow_job_id,workflow_job_run_id,action,repo_full_name,repo_private) VALUES (NULL,?,?,?,?,?,?,?);"
+	if got != want {
+		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
+	}
+
+	got = Insert(&TestStruct3{}, &InsertOpts{
+		PrependColumns: "id",
+		PrependValues: "NULL",
+	})
+	want = "INSERT INTO test_struct3s (id,created_at) VALUES (NULL,?);"
 	if got != want {
 		t.Errorf("got the following: \n%s\n want:\n%s\n", got, want)
 	}
